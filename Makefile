@@ -25,6 +25,11 @@ EXTRA_CLEAN = sql/odbc_fdw.sql expected/odbc_fdw.out
 
 SHLIB_LINK = -lodbc
 
+ifdef DEBUG
+override CFLAGS += -DDEBUG -g -O0
+endif
+
+
 ifdef USE_PGXS
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)

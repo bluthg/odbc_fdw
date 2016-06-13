@@ -406,7 +406,7 @@ odbcGetOptions(Oid foreigntableid, char **svr_dsn, char **svr_database, char **s
     }
 
 #ifdef DEBUG
-    elog(NOTICE, "list length: %i", (*mapping_list)->length);
+    //elog(NOTICE, "list length: %i", (*mapping_list)->length);
 #endif
 
     /* Default values, if required */
@@ -815,7 +815,7 @@ static void odbcGetForeignPaths(PlannerInfo *root, RelOptInfo *baserel, Oid fore
 	
 	add_path(baserel, 
 		(Path *) create_foreignscan_path(root, baserel, baserel->rows, startup_cost, total_cost,
-			NIL, NULL, NIL));
+			NIL, NULL, NIL, NIL /* no fdw_private list */));
 	
 	#ifdef DEBUG
 		ereport(NOTICE,
@@ -859,7 +859,10 @@ static ForeignScan* odbcGetForeignPlan(PlannerInfo *root, RelOptInfo *baserel,
 			));
 	#endif
 	
-	return make_foreignscan(tlist, scan_clauses, scan_relid, NIL, NIL);
+	return make_foreignscan(tlist, scan_clauses,
+                                scan_relid, NIL, NIL,
+                                NIL /* fdw_scan_tlist */, NIL, /* fdw_recheck_quals */
+                                NIL /* outer_plan */ );
 }
 
 /* routines for versions older than 9.2.0 */
@@ -1220,7 +1223,7 @@ odbcIterateForeignScan(ForeignScanState *node)
         SQLSMALLINT	NullablePtr;
         int i;
         int k;
-        bool found = FALSE;
+        bool found;
 
         /* Allocate memory for the masks */
         col_position_mask = NIL;
@@ -1229,6 +1232,7 @@ odbcIterateForeignScan(ForeignScanState *node)
         /* Obtain the column information of the first row. */
         for (i = 1; i <= columns; i++)
         {
+            found = FALSE;
             ColumnName = (SQLCHAR *) palloc(sizeof(SQLCHAR) * 255);
             SQLDescribeCol(stmt,
                            i,						/* ColumnName */
