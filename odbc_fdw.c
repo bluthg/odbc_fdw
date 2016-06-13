@@ -1319,11 +1319,11 @@ odbcIterateForeignScan(ForeignScanState *node)
             if (mapped_pos == -1)
                 continue;
 
-            buf = (char *) palloc(sizeof(char) * col_size);
+            buf = (char *) palloc(sizeof(char) * (col_size+1));
 
-            /* retrieve column data as a string */
+            /* retrieve column data as a zero-terminated string */
             ret = SQLGetData(stmt, i, SQL_C_CHAR,
-                             buf, sizeof(char) * col_size, &indicator);
+                             buf, sizeof(char) * (col_size+1), &indicator);
 
             if (SQL_SUCCEEDED(ret))
             {
