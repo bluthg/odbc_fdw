@@ -1,4 +1,4 @@
-ODBC FDW (beta) for PostgreSQL 9.1+
+ODBC FDW (beta) for PostgreSQL 9.5+
 ===================================
 
 This PostgreSQL extension implements a Foreign Data Wrapper (FDW) for
@@ -15,12 +15,9 @@ A list of driver managers is available here: http://en.wikipedia.org/wiki/Open_D
 
 Once that's done, the extension can be built with:
 
-PATH=/usr/local/pgsql91/bin/:$PATH make USE_PGXS=1 make
-sudo PATH=/usr/local/pgsql91/bin/:$PATH make USE_PGXS=1 install
+PATH=$(pg_config --bindir):$PATH make USE_PGXS=1
+sudo PATH=$(pg_config --bindir):$PATH make USE_PGXS=1 install
 
-(assuming you have PostgreSQL 9.1 in /usr/local/pgsql91).
-
-I've tested on Mac OS X 10.6 and Windows 7. More testings on other platforms are coming soon.
 
 TODO
 -----------

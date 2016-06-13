@@ -406,7 +406,7 @@ odbcGetOptions(Oid foreigntableid, char **svr_dsn, char **svr_database, char **s
     }
 
 #ifdef DEBUG
-    elog(NOTICE, "list length: %i", (*mapping_list)->length);
+    //elog(NOTICE, "list length: %i", (*mapping_list)->length);
 #endif
 
     /* Default values, if required */
@@ -601,7 +601,7 @@ odbcGetTableSize(char *svr_dsn, char *svr_database, char *svr_schema, char *svr_
     }
     else
     {
-        elog(NOTICE, "Opps!");
+        elog(NOTICE, "Oops!");
     }
 
     /* Free handles, and disconnect */
@@ -815,7 +815,7 @@ static void odbcGetForeignPaths(PlannerInfo *root, RelOptInfo *baserel, Oid fore
 	
 	add_path(baserel, 
 		(Path *) create_foreignscan_path(root, baserel, baserel->rows, startup_cost, total_cost,
-			NIL, NULL, NIL));
+			NIL, NULL, NIL, NIL /* no fdw_private list */));
 	
 	#ifdef DEBUG
 		ereport(NOTICE,
@@ -859,7 +859,10 @@ static ForeignScan* odbcGetForeignPlan(PlannerInfo *root, RelOptInfo *baserel,
 			));
 	#endif
 	
-	return make_foreignscan(tlist, scan_clauses, scan_relid, NIL, NIL);
+	return make_foreignscan(tlist, scan_clauses,
+                                scan_relid, NIL, NIL,
+                                NIL /* fdw_scan_tlist */, NIL, /* fdw_recheck_quals */
+                                NIL /* outer_plan */ );
 }
 
 /* routines for versions older than 9.2.0 */
@@ -1220,7 +1223,7 @@ odbcIterateForeignScan(ForeignScanState *node)
         SQLSMALLINT	NullablePtr;
         int i;
         int k;
-        bool found = FALSE;
+        bool found;
 
         /* Allocate memory for the masks */
         col_position_mask = NIL;
@@ -1229,6 +1232,7 @@ odbcIterateForeignScan(ForeignScanState *node)
         /* Obtain the column information of the first row. */
         for (i = 1; i <= columns; i++)
         {
+            found = FALSE;
             ColumnName = (SQLCHAR *) palloc(sizeof(SQLCHAR) * 255);
             SQLDescribeCol(stmt,
                            i,						/* ColumnName */
@@ -1315,23 +1319,31 @@ odbcIterateForeignScan(ForeignScanState *node)
             if (mapped_pos == -1)
                 continue;
 
-            buf = (char *) palloc(sizeof(char) * col_size);
+            buf = (char *) palloc(sizeof(char) * (col_size+1));
 
-            /* retrieve column data as a string */
+            /* retrieve column data as a zero-terminated string */
             ret = SQLGetData(stmt, i, SQL_C_CHAR,
-                             buf, sizeof(char) * col_size, &indicator);
+                             buf, sizeof(char) * (col_size+1), &indicator);
 
             if (SQL_SUCCEEDED(ret))
             {
                 /* Handle null columns */
-                if (indicator == SQL_NULL_DATA) strcpy(buf, "NULL");
-                initStringInfo(&col_data);
-                appendStringInfoString (&col_data, buf);
+                if (indicator == SQL_NULL_DATA)
+                {
+                  // BuildTupleFromCStrings expects NULLs to be NULL pointers
+                  col_data.data = NULL;
+                  values[mapped_pos] = NULL;
+                }
+                else
+                {
+                  initStringInfo(&col_data);
+                  appendStringInfoString (&col_data, buf);
 
                 values[mapped_pos] = col_data.data;
 #ifdef DEBUG
                 elog(NOTICE, "values[%i] = %s", mapped_pos, values[mapped_pos]);
 #endif
+                }
             }
             pfree(buf);
         }
