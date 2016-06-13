@@ -1328,14 +1328,22 @@ odbcIterateForeignScan(ForeignScanState *node)
             if (SQL_SUCCEEDED(ret))
             {
                 /* Handle null columns */
-                if (indicator == SQL_NULL_DATA) strcpy(buf, "NULL");
-                initStringInfo(&col_data);
-                appendStringInfoString (&col_data, buf);
+                if (indicator == SQL_NULL_DATA)
+                {
+                  // BuildTupleFromCStrings expects NULLs to be NULL pointers
+                  col_data.data = NULL;
+                  values[mapped_pos] = NULL;
+                }
+                else
+                {
+                  initStringInfo(&col_data);
+                  appendStringInfoString (&col_data, buf);
 
                 values[mapped_pos] = col_data.data;
 #ifdef DEBUG
                 elog(NOTICE, "values[%i] = %s", mapped_pos, values[mapped_pos]);
 #endif
+                }
             }
             pfree(buf);
         }
