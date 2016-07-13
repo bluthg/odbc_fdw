@@ -17,22 +17,16 @@ MODULE_big = odbc_fdw
 OBJS = odbc_fdw.o
 
 EXTENSION = odbc_fdw
-DATA = odbc_fdw--1.0.sql
+DATA = odbc_fdw--0.0.1.sql
 
 REGRESS = odbc_fdw
 
-EXTRA_CLEAN = sql/odbc_fdw.sql expected/odbc_fdw.out
-
 SHLIB_LINK = -lodbc
 
-ifdef USE_PGXS
+ifdef DEBUG
+override CFLAGS += -DDEBUG -g -O0
+endif
+
 PG_CONFIG = pg_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
-else
-subdir = contrib/odbc_fdw
-top_builddir = ../..
-include $(top_builddir)/src/Makefile.global
-include $(top_srcdir)/contrib/contrib-global.mk
-endif
-

@@ -1,0 +1,17 @@
+Source: odbc-fdw
+Section: database
+Priority: optional
+Maintainer: CARTO <dataservices@carto.com>
+Build-Depends: debhelper (>= 8.0.0), unixodbc-dev (>= 2.2), postgresql-server-dev-9.5 (>= 9.5)
+Standards-Version: 3.9.2
+Homepage: https://github.com/CartoDB/odbc_fdw
+Vcs-Browser: https://github.com/CartoDB/odbc_fdw
+Vcs-Git: git@github.com:CartoDB/odbc_fdw.git
+
+Package: odbc-fdw
+Architecture: any
+Section: database
+Priority: optional
+Depends: ${shlibs:Depends}, ${misc:Depends}, libodbc1 (>= 2.2), libc6 (>= 2.15), libltdl7 (>= 2.4), postgresql-9.5 (>= 9.5)
+Description: PostgreSQL FDW for remote databases using ODBC
+ Foreign Data Wrapper (FDW) for remote databases using Open Database Connectivity (ODBC)

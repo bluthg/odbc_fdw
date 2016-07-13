@@ -1,2 +1,6 @@
 # Generated subdirectories
 /results/
+**/*.o
+**/*.so
+regression.diffs
+regression.out

@@ -1,0 +1,1 @@
+CREATE EXTENSION odbc_fdw;

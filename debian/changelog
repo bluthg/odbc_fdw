@@ -1,0 +1,5 @@
+odbc-fdw (0.0.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #21)
+
+ -- Rafa de la Torre <rtorre@carto.com>  Tue, 12 Jul 2016 14:00:54 +0000

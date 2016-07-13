@@ -1,0 +1,15 @@
+# How to generate the binary package from the sources
+```sh
+PKG_NAME=odbc-fdw
+PKG_VERSION=0.0.1
+
+mkdir /tmp/${PKG_NAME}
+cd /tmp/${PKG_NAME}
+
+# Get the source tarball from a tag
+wget -O ${PKG_NAME}_${PKG_VERSION}.orig.tar.gz https://github.com/CartoDB/odbc_fdw/archive/${PKG_VERSION}.tar.gz
+
+tar -xzf ${PKG_NAME}_${PKG_VERSION}.orig.tar.gz
+cd ${PKG_NAME}_${PKG_VERSION}
+debuild -us -uc
+```
