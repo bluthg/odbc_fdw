@@ -2037,12 +2037,15 @@ odbcImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 			while (SQL_SUCCESS == ret)
 			{
 				ret = SQLFetch(tables_stmt);
+				elog(NOTICE,"FETCH TABLE: %d",ret);
 				if (SQL_SUCCESS == ret)
 				{
 					int excluded = false;
 					TableName = (SQLCHAR *) palloc(sizeof(SQLCHAR) * MAXIMUM_TABLE_NAME_LEN);
 					ret = SQLGetData(tables_stmt, SQLTABLES_NAME_COLUMN, SQL_C_CHAR, TableName, MAXIMUM_TABLE_NAME_LEN, &indicator);
+					elog(NOTICE,"GET TABLE NAME: %d ind %ld",ret, indicator);
 					check_return(ret, "Reading table name", tables_stmt, SQL_HANDLE_STMT);
+					elog(NOTICE,"TABLE NAME: %s",TableName);
 
 					/* Since we're not filtering the SQLTables call by schema
 					   we must exclude here tables that belong to other schemas.
